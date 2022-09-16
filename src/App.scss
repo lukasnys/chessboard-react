@@ -1,0 +1,59 @@
+.chessboard {
+    position: relative;
+}
+
+.row {
+    display: flex;
+}
+
+.square {
+    width: calc(100% / 8);
+    aspect-ratio: 1;
+    background-color: #eeeed2;
+    background-size: contain;
+}
+
+.square-dark {
+    // TODO: Make this a variable
+    background-color: var(--selectedColor, #769656);
+}
+
+.hint {
+    background-color: rgba(0,0,0,.1);
+    padding: 4.2%;
+
+    border-radius: 50%;
+    background-clip: content-box;
+    box-sizing: border-box;
+    pointer-events: none;
+
+    width: calc(100% / 8);
+    height: calc(100% / 8);
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+}
+
+// Create classes for tile offsets
+$cols: 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h';
+@for $row from 1 through 8 {
+    @for $col from 1 through length($cols) {
+        .#{nth($cols,$col)}#{$row} {
+            transform: translate(($col - 1) * 100%, ($row - 1) * 100%);
+        }
+    }
+}
+
+// Background images
+$pieces: 'b', 'k', 'n', 'p', 'q', 'r';
+@each $piece in $pieces {
+    .b#{$piece} {
+        background-image: url("./images/b#{$piece}.png");
+    }
+
+    .w#{$piece} {
+        background-image: url("./images/w#{$piece}.png");
+    }
+}

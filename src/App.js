@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.scss';
-import { ROWS, COLS } from './global'
+import { ROWS, COLS, POINTS } from './global'
 import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from './pieces';
 
 const initialiseBoard = () => {
@@ -125,7 +125,7 @@ function App() {
 
     // Check move legality
     const piece = findPiece(oldPosition);
-    if (!piece.isMoveLegal(pieces, newPosition)) return false;
+    if (!piece.isMoveLegal(pieces, moveNumber, newPosition)) return false;
 
     const destPiece = findPiece(newPosition);
 
@@ -133,13 +133,20 @@ function App() {
     // Update state
     setPieces(current => {
       // Filter the captured piece if there is one
-      const piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ? 
+      let piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ? 
         current.filter(piece => piece.position !== newPosition) : 
         current;
 
+      // Remove pawn in case of an en passant
+      const isPiecePawn = piece.POINTS === POINTS.PAWN
+      const didChangeColumn = oldPosition[0] !== newPosition[0];
+      if (isPiecePawn && didChangeColumn && !destPiece) 
+        piecesCopy = piecesCopy.filter(piece => piece.position !== newPosition[0] + oldPosition[1])
+      
+
       // Change the position of the moved piece
       return piecesCopy.map(piece => piece.position === oldPosition ? 
-        Piece.clone(piece).setPosition(newPosition) : 
+        Piece.clone(piece).setPosition(newPosition, moveNumber) : 
         Piece.clone(piece));
     });
 
@@ -162,7 +169,7 @@ function App() {
         )}
 
         {
-          selected != null && selected.getLegalMoves(pieces).map((position) =>
+          selected != null && selected.getLegalMoves(pieces, moveNumber).map((position) =>
             <div key={position} className={`hint ${position}`}></div>
           )
         }

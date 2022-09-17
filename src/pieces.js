@@ -1,4 +1,4 @@
-import { COLS } from "./global";
+import { COLS, POINTS } from "./global";
 
 export class Piece {
     POINTS = -1;
@@ -20,6 +20,7 @@ export class Piece {
     ]
 
     hasMoved = false;
+    doubleMoveMoveNumber = 0;
 
     constructor(position, isWhite) {
         this.position = position;
@@ -40,15 +41,15 @@ export class Piece {
             : "";
     }
 
-    isMoveLegal(pieces, newPosition) {
-        return this.getLegalMoves(pieces).indexOf(newPosition) !== -1;
+    isMoveLegal(pieces, moveNumber, newPosition) {
+        return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
     }
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         return [];
     }
 
-    setPosition(position) {
+    setPosition(position, moveNumber) {
         this.hasMoved = true;
         this.position = position;
         return this;
@@ -85,54 +86,72 @@ export class Piece {
 }
 
 export class Pawn extends Piece {
-    POINTS = 1;
+    POINTS = POINTS.PAWN;
     FIRST_LETTER = "p";
 
-    getLegalMoves(pieces) {
-        let moves = []
+    getLegalMoves(pieces, moveNumber) {
+        const moves = []
 
         const column = COLS.indexOf(this.position[0]);
         const row = +this.position[1];
 
-        // Variables that differ depending on color of the piece
-        const startingRow = this.isWhite ? 2 : 7;
+        // Calculate direction of moves depending on color of the piece
         const sign = this.isWhite ? 1 : -1;
 
         // Single square move
-        moves.push(this.position[0] + (row + (sign * 1)))
+        const singleMovePosition = this.position[0] + (row + (sign * 1));
+        if (!pieces.find(piece => piece.position === singleMovePosition)) {
+            moves.push(this.position[0] + (row + (sign * 1)))
+        }
         
         // Double square move
-        const isStartingSpot = row === startingRow;
-        if (isStartingSpot) moves.push(this.position[0] + (row + (sign * 2)))
-
-        // Filter out moves where a piece resides
-        moves = moves.filter(move => !pieces.find(piece => piece.position === move))
-
-        const leftCapturePosition = COLS[column - 1] + (row + (sign * 1))
-        const leftCapturePiece = pieces.find(piece => piece.position === leftCapturePosition)
-        if (leftCapturePiece && leftCapturePiece.isWhite !== this.isWhite) {
-            moves.push(leftCapturePosition)
+        const doubleMovePosition = this.position[0] + (row + (sign * 2));
+        if (!this.hasMoved && !pieces.find(piece => piece.position === doubleMovePosition)) {
+            moves.push(doubleMovePosition)
         }
 
-        const rightCapturePosition = COLS[column + 1] + (row + (sign * 1))
-        const rightCapturePiece = pieces.find(piece => piece.position === rightCapturePosition)
-        if (rightCapturePiece && rightCapturePiece.isWhite !== this.isWhite) {
-            moves.push(rightCapturePosition)
-        }
+        // Captures and passants
+        ([-1, 1]).forEach(columnSign => {
+            const capturePosition = COLS[column + columnSign] + (row + (sign * 1))
+            const capturePiece = pieces.find(piece => piece.position === capturePosition)
+            if (capturePiece && capturePiece.isWhite !== this.isWhite) {
+                moves.push(capturePosition)
+            }
 
+            const enPassantPosition = COLS[column + columnSign] + row;
+            const enPassantPiece = pieces.find(piece => piece.position === enPassantPosition);
+            
+            const isEnPassantPiecePawn = enPassantPiece?.POINTS === POINTS.PAWN;
+            const isEnPassantPieceOtherColor = enPassantPiece?.isWhite !== this.isWhite;
+            const wasDoubleMoveLastMove = enPassantPiece?.doubleMoveMoveNumber === (moveNumber - 1 )
+            
+            if (isEnPassantPiecePawn && isEnPassantPieceOtherColor && wasDoubleMoveLastMove) {
+                moves.push(capturePosition);
+            }
+        })
 
-        // TODO: check for en passant
+        // TODO: check for en passant (only allow immediately after double move)
 
         return moves;
+    }
+
+    setPosition(position, moveNumber) {
+        const isDoubleMove = !this.hasMoved && Math.abs(+position[1] - +this.position[1]) === 2;
+
+        const pawn = super.setPosition(position);
+
+        if (isDoubleMove) pawn.doubleMoveMoveNumber = moveNumber;
+
+        return pawn;
     }
 }
 
 export class Bishop extends Piece {
-    POINTS = 3;
+    POINTS = POINTS.BISHOP;
     FIRST_LETTER = "b";
     NOTATION = "B";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         const signs = this.DIAGONAL_SIGNS;        
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -140,11 +159,11 @@ export class Bishop extends Piece {
 }
 
 export class Knight extends Piece {
-    POINTS = 3;
+    POINTS = POINTS.KNIGHT;
     FIRST_LETTER = "n";
     NOTATION = "N";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         let moves = [];
 
         const column = COLS.indexOf(this.position[0]);
@@ -175,11 +194,11 @@ export class Knight extends Piece {
 }
 
 export class Rook extends Piece {
-    POINTS = 5;
+    POINTS = POINTS.ROOK;
     FIRST_LETTER = "r";
     NOTATION = "R";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         const signs = this.STRAIGHT_SIGNS;
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -187,11 +206,11 @@ export class Rook extends Piece {
 }
 
 export class Queen extends Piece {
-    POINTS = 9;
+    POINTS = POINTS.QUEEN;
     FIRST_LETTER = "q";
     NOTATION = "Q";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -202,7 +221,7 @@ export class King extends Piece {
     FIRST_LETTER = "k";
     NOTATION = "K";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, moveNumber) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
         return this.generateMovesFromSignsArray(signs, pieces, 1);

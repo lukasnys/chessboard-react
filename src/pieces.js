@@ -36,8 +36,8 @@ export class Piece {
             : "";
     }
 
-    isMoveLegal(pieces, moveNumber, newPosition) {
-        return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
+    isMoveLegal(pieces, newPosition) {
+        return this.getLegalMoves(pieces).indexOf(newPosition) !== -1;
     }
 
     setPosition(position) {
@@ -82,6 +82,10 @@ export class Pawn extends Piece {
     NOTATION = "N";
 
     doubleMoveMoveNumber = 0;
+
+    isMoveLegal(pieces, moveNumber, newPosition) {
+        return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
+    }
 
     getLegalMoves(pieces, moveNumber) {
         const moves = []

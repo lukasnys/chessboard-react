@@ -48,7 +48,7 @@ function App() {
   const [selected, setSelected] = useState();
   const [moveNumber, setMoveNumber] = useState(0);
 
-  const onSquareClicked = (position) => {    
+  const onSquareClicked = (position) => {
     const piece = findPiece(position);
 
     // Select the clicked piece
@@ -89,27 +89,27 @@ function App() {
   const getMoveNotation = (oldPosition, newPosition) => {
     const piece = findPiece(oldPosition);
     const destPiece = findPiece(newPosition);
-    
+
     let moveNotation = piece.NOTATION;
-    
+
     // TODO: add part for ambiguous moves
-    
+
     if (destPiece) {
-      
+
       // If pawn captures, add column of pawn
       if (!piece.NOTATION)
-      moveNotation += piece.position[0];
-      
+        moveNotation += piece.position[0];
+
       moveNotation += 'x'; // captures
     }
-    
-    
+
+
     // TODO: castling (0-0 or 0-0-0)
-    
+
     // TODO: check (+)
-    
+
     // TODO: checkmate (#)
-    
+
     moveNotation += newPosition;
 
     if (!piece.NOTATION && (+newPosition[1] === 1 || +newPosition[1] === 8)) {
@@ -133,20 +133,20 @@ function App() {
     // Update state
     setPieces(current => {
       // Filter the captured piece if there is one
-      let piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ? 
-        current.filter(piece => piece.position !== newPosition) : 
+      let piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ?
+        current.filter(piece => piece.position !== newPosition) :
         current;
 
       // Remove pawn in case of an en passant
       const isPiecePawn = piece.POINTS === POINTS.PAWN
       const didChangeColumn = oldPosition[0] !== newPosition[0];
-      if (isPiecePawn && didChangeColumn && !destPiece) 
+      if (isPiecePawn && didChangeColumn && !destPiece)
         piecesCopy = piecesCopy.filter(piece => piece.position !== newPosition[0] + oldPosition[1])
-      
+
 
       // Change the position of the moved piece
-      return piecesCopy.map(piece => piece.position === oldPosition ? 
-        Piece.clone(piece).setPosition(newPosition, moveNumber) : 
+      return piecesCopy.map(piece => piece.position === oldPosition ?
+        Piece.clone(piece).setPosition(newPosition, moveNumber) :
         Piece.clone(piece));
     });
 
@@ -156,6 +156,7 @@ function App() {
   return (
     <div className="App">
       <div className="chessboard">
+        {/* PIECES AND BOARD */}
         {ROWS.map((row, i) =>
           <div key={i} className="row">
             {COLS.map((col, j) => {
@@ -168,6 +169,8 @@ function App() {
           </div>
         )}
 
+
+        {/* MOVEMENT HINTS */}
         {
           selected != null && selected.getLegalMoves(pieces, moveNumber).map((position) =>
             <div key={position} className={`hint ${position}`}></div>

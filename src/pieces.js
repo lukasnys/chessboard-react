@@ -20,7 +20,6 @@ export class Piece {
     ]
 
     hasMoved = false;
-    doubleMoveMoveNumber = 0;
 
     constructor(position, isWhite) {
         this.position = position;
@@ -45,11 +44,11 @@ export class Piece {
         return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
     }
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         return [];
     }
 
-    setPosition(position, moveNumber) {
+    setPosition(position) {
         this.hasMoved = true;
         this.position = position;
         return this;
@@ -88,6 +87,8 @@ export class Piece {
 export class Pawn extends Piece {
     POINTS = POINTS.PAWN;
     FIRST_LETTER = "p";
+
+    doubleMoveMoveNumber = 0;
 
     getLegalMoves(pieces, moveNumber) {
         const moves = []
@@ -130,8 +131,6 @@ export class Pawn extends Piece {
             }
         })
 
-        // TODO: check for en passant (only allow immediately after double move)
-
         return moves;
     }
 
@@ -151,7 +150,7 @@ export class Bishop extends Piece {
     FIRST_LETTER = "b";
     NOTATION = "B";
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         const signs = this.DIAGONAL_SIGNS;        
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -163,7 +162,7 @@ export class Knight extends Piece {
     FIRST_LETTER = "n";
     NOTATION = "N";
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         let moves = [];
 
         const column = COLS.indexOf(this.position[0]);
@@ -198,7 +197,7 @@ export class Rook extends Piece {
     FIRST_LETTER = "r";
     NOTATION = "R";
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         const signs = this.STRAIGHT_SIGNS;
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -210,7 +209,7 @@ export class Queen extends Piece {
     FIRST_LETTER = "q";
     NOTATION = "Q";
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
         return this.generateMovesFromSignsArray(signs, pieces);
@@ -221,7 +220,7 @@ export class King extends Piece {
     FIRST_LETTER = "k";
     NOTATION = "K";
 
-    getLegalMoves(pieces, moveNumber) {
+    getLegalMoves(pieces) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
         return this.generateMovesFromSignsArray(signs, pieces, 1);

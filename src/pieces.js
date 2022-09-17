@@ -216,6 +216,10 @@ export class King extends Piece {
     getLegalMoves(pieces) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
-        return this.generateMovesFromSignsArray(signs, pieces, 1);
+        const moves = this.generateMovesFromSignsArray(signs, pieces, 1);
+
+        // TODO: castling moves
+
+        return moves;
     }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.scss';
 import { ROWS, COLS } from './global'
-import { Bishop, King, Knight, Pawn, Queen, Rook } from './pieces';
+import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from './pieces';
 
 const initialiseBoard = () => {
   const pieces = [];
@@ -51,6 +51,7 @@ function App() {
   const onSquareClicked = (position) => {    
     const piece = findPiece(position);
 
+    // Select the clicked piece
     if (!selected || (piece && selected.isWhite === piece.isWhite)) {
       // Check if a piece is clicked
       if (!piece) return;
@@ -59,6 +60,7 @@ function App() {
       if (piece.isWhite && moveNumber % 2 !== 0) return;
       if (!piece.isWhite && moveNumber % 2 === 0) return;
 
+      // If the same piece is clicked twice, unselect it
       if (selected && piece.position === selected.position) {
         setSelected(null);
         return;
@@ -78,6 +80,7 @@ function App() {
     setMoveNumber(moveNumber + 1);
   }
 
+  // Returns reference to the piece
   const findPiece = (position) => {
     return pieces.find((p) => p.position === position);
   }
@@ -117,32 +120,28 @@ function App() {
   }
 
   const movePiece = (oldPosition, newPosition) => {
-    // Make a copy
-    let piecesCopy = pieces;
-
     // Check if same position
     if (oldPosition === newPosition) return false;
 
+    // Check move legality
     const piece = findPiece(oldPosition);
-    const destPiece = findPiece(newPosition);
-
-    // Check if move is legal 
     if (!piece.isMoveLegal(pieces, newPosition)) return false;
 
-    console.log(getMoveNotation(oldPosition, newPosition));
+    const destPiece = findPiece(newPosition);
 
-    if (!destPiece) {
-      piece.position = newPosition;
-      return true;
-    }
+    // TODO: castling
+    // Update state
+    setPieces(current => {
+      // Filter the captured piece if there is one
+      const piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ? 
+        current.filter(piece => piece.position !== newPosition) : 
+        current;
 
-    // Capture
-    if (piece.isWhite !== destPiece.isWhite) {
-      // Remove captured piece
-      setPieces(piecesCopy.filter((p) => p.position !== newPosition));
-    }
-    
-    piece.position = newPosition;
+      // Change the position of the moved piece
+      return piecesCopy.map(piece => piece.position === oldPosition ? 
+        Piece.clone(piece).setPosition(newPosition) : 
+        Piece.clone(piece));
+    });
 
     return true;
   }

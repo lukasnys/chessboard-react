@@ -1,10 +1,6 @@
 import { COLS, POINTS } from "./global";
 
-export class Piece {
-    POINTS = -1;
-    FIRST_LETTER = "";
-    NOTATION = "";
-    
+export class Piece {    
     DIAGONAL_SIGNS = [
         { colSign: -1, rowSign: -1}, // North West
         { colSign: 1, rowSign: -1}, // North East
@@ -42,10 +38,6 @@ export class Piece {
 
     isMoveLegal(pieces, moveNumber, newPosition) {
         return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
-    }
-
-    getLegalMoves(pieces) {
-        return [];
     }
 
     setPosition(position) {
@@ -87,6 +79,7 @@ export class Piece {
 export class Pawn extends Piece {
     POINTS = POINTS.PAWN;
     FIRST_LETTER = "p";
+    NOTATION = "N";
 
     doubleMoveMoveNumber = 0;
 

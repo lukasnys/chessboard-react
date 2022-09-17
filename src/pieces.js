@@ -1,21 +1,5 @@
 import { COLS } from "./global";
 
-const isDiagonal = (position, newPosition) => {
-    // See if difference in column is equal to difference in row
-    const rowDiff = Math.abs(newPosition[1] - position[1]);
-    const colDiff = Math.abs(
-        COLS.indexOf(newPosition[0]) - COLS.indexOf(position[0])
-    );
-
-    return rowDiff === colDiff;
-};
-
-const isStraight = (position, newPosition) => {
-    const sameRow = newPosition[1] === position[1];
-    const sameCol = newPosition[0] === position[0];
-    return sameRow || sameCol;
-};
-
 export class Piece {
     POINTS = -1;
     FIRST_LETTER = "";

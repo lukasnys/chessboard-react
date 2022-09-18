@@ -6,5 +6,6 @@ export const POINTS = {
     KNIGHT: 3,
     BISHOP: 3,
     ROOK: 5,
-    QUEEN: 9
+    QUEEN: 9,
+    KING: -1
 }

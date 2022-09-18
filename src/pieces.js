@@ -1,18 +1,18 @@
 import { COLS, POINTS } from "./global";
 
-export class Piece {    
+export class Piece {
     DIAGONAL_SIGNS = [
-        { colSign: -1, rowSign: -1}, // North West
-        { colSign: 1, rowSign: -1}, // North East
-        { colSign: 1, rowSign: 1}, // South East
-        { colSign: -1, rowSign: 1}, // South West
+        { colSign: -1, rowSign: -1 }, // North West
+        { colSign: 1, rowSign: -1 }, // North East
+        { colSign: 1, rowSign: 1 }, // South East
+        { colSign: -1, rowSign: 1 }, // South West
     ]
-    
+
     STRAIGHT_SIGNS = [
-        { colSign: 0, rowSign: -1}, // Up
-        { colSign: 1, rowSign: 0}, // Right
-        { colSign: 0, rowSign: 1}, // Down
-        { colSign: -1, rowSign: 0}, // Left
+        { colSign: 0, rowSign: -1 }, // Up
+        { colSign: 1, rowSign: 0 }, // Right
+        { colSign: 0, rowSign: 1 }, // Down
+        { colSign: -1, rowSign: 0 }, // Left
     ]
 
     hasMoved = false;
@@ -48,30 +48,30 @@ export class Piece {
 
     generateMovesFromSignsArray(signs, pieces, maxDistance = 7) {
         const moves = [];
-    
+
         const column = COLS.indexOf(this.position[0]);
         const row = +this.position[1];
-    
+
         // Goes in a certain direction starting from the piece and sees if the square is valid
-        signs.forEach(({colSign, rowSign}) => {
+        signs.forEach(({ colSign, rowSign }) => {
             for (let i = 1; i < 1 + maxDistance; i++) {
                 const destColumnNumber = column + (colSign * i);
                 const destRow = row + (rowSign * i);
-    
+
                 // Check bounds of 
                 if (destColumnNumber < 0 || destColumnNumber > 7 || destRow < 1 || destRow > 8) break;
-    
+
                 const destPosition = COLS[destColumnNumber] + destRow;
                 const piece = pieces.find(piece => piece.position === destPosition);
-    
+
                 if (piece && piece.isWhite === this.isWhite) break;
-    
+
                 moves.push(destPosition);
-    
+
                 if (piece && piece.isWhite !== this.isWhite) break;
             }
         })
-    
+
         return moves;
     }
 }
@@ -83,7 +83,7 @@ export class Pawn extends Piece {
 
     doubleMoveMoveNumber = 0;
 
-    isMoveLegal(pieces, moveNumber, newPosition) {
+    isMoveLegal(pieces, newPosition, moveNumber) {
         return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
     }
 
@@ -101,7 +101,7 @@ export class Pawn extends Piece {
         if (!pieces.find(piece => piece.position === singleMovePosition)) {
             moves.push(this.position[0] + (row + (sign * 1)))
         }
-        
+
         // Double square move
         const doubleMovePosition = this.position[0] + (row + (sign * 2));
         if (!this.hasMoved && !pieces.find(piece => piece.position === doubleMovePosition)) {
@@ -118,11 +118,11 @@ export class Pawn extends Piece {
 
             const enPassantPosition = COLS[column + columnSign] + row;
             const enPassantPiece = pieces.find(piece => piece.position === enPassantPosition);
-            
+
             const isEnPassantPiecePawn = enPassantPiece?.POINTS === POINTS.PAWN;
             const isEnPassantPieceOtherColor = enPassantPiece?.isWhite !== this.isWhite;
-            const wasDoubleMoveLastMove = enPassantPiece?.doubleMoveMoveNumber === (moveNumber - 1 )
-            
+            const wasDoubleMoveLastMove = enPassantPiece?.doubleMoveMoveNumber === (moveNumber - 1)
+
             if (isEnPassantPiecePawn && isEnPassantPieceOtherColor && wasDoubleMoveLastMove) {
                 moves.push(capturePosition);
             }
@@ -148,7 +148,7 @@ export class Bishop extends Piece {
     NOTATION = "B";
 
     getLegalMoves(pieces) {
-        const signs = this.DIAGONAL_SIGNS;        
+        const signs = this.DIAGONAL_SIGNS;
 
         return this.generateMovesFromSignsArray(signs, pieces);
     }
@@ -165,6 +165,7 @@ export class Knight extends Piece {
         const column = COLS.indexOf(this.position[0]);
         const row = +this.position[1];
 
+        // TODO: refactor
         // Eight possible moves
         moves.push(COLS[column + 1] + (row - 2))
         moves.push(COLS[column + 2] + (row - 1))
@@ -214,6 +215,7 @@ export class Queen extends Piece {
 }
 
 export class King extends Piece {
+    POINTS = POINTS.KING;
     FIRST_LETTER = "k";
     NOTATION = "K";
 
@@ -222,7 +224,18 @@ export class King extends Piece {
 
         const moves = this.generateMovesFromSignsArray(signs, pieces, 1);
 
-        // TODO: castling moves
+        if (this.hasMoved) return moves;
+
+        const castleVariables = [{ rookColumn: "a", piecesColumns: ["b", "c", "d"] }, { rookColumn: "h", piecesColumns: ["f", "g"] }];
+        castleVariables.forEach(({ rookColumn, piecesColumns }) => {
+            const castlePosition = rookColumn + this.position[1];
+            const castleRook = pieces.find(piece => piece.POINTS === POINTS.ROOK && piece.isWhite === this.isWhite && piece.position === castlePosition);
+            const piecesBetween = piecesColumns.map(col => col + this.position[1]).map(position => pieces.find(piece => piece.position === position));
+
+            if (castleRook && !castleRook.hasMoved && piecesBetween.every(piece => !piece)) {
+                moves.push(castlePosition);
+            }
+        })
 
         return moves;
     }

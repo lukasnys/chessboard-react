@@ -49,22 +49,25 @@ function App() {
   const [moveNumber, setMoveNumber] = useState(0);
 
   const onSquareClicked = (position) => {
-    const piece = findPiece(position);
+    // Unselect the piece if it's clicked twice
+    if (selected?.position === position) {
+      setSelected(null);
+      return;
+    }
 
-    // Select the clicked piece
-    if (!selected || (piece && selected.isWhite === piece.isWhite)) {
+    const piece = findPiece(position);
+    
+    const isPieceSameColor = piece?.isWhite === selected?.isWhite;
+    const isCastle = selected?.POINTS === POINTS.KING && piece?.POINTS === POINTS.ROOK;
+    
+    // Select the clicked piece if no piece was selected or if another piece of the same color is clicked
+    if (!selected || (isPieceSameColor && !isCastle)) {
       // Check if a piece is clicked
       if (!piece) return;
 
       // Check if it's the correct color's turn
       if (piece.isWhite && moveNumber % 2 !== 0) return;
       if (!piece.isWhite && moveNumber % 2 === 0) return;
-
-      // If the same piece is clicked twice, unselect it
-      if (selected && piece.position === selected.position) {
-        setSelected(null);
-        return;
-      }
 
       setSelected(piece);
       return;
@@ -125,11 +128,38 @@ function App() {
 
     // Check move legality
     const piece = findPiece(oldPosition);
-    if (!piece.isMoveLegal(pieces, moveNumber, newPosition)) return false;
+    if (!piece.isMoveLegal(pieces, newPosition, moveNumber)) return false;
 
     const destPiece = findPiece(newPosition);
 
-    // TODO: castling
+    const isCastle = piece.POINTS === POINTS.KING && destPiece?.POINTS === POINTS.ROOK && piece.isWhite === destPiece?.isWhite;
+    if (isCastle) {
+      // TODO: check checks on spaces between the castle
+      setPieces(current => {
+        return current.map(piece => {
+          
+          const pieceClone = Piece.clone(piece);
+          
+          // TODO: refactor
+          if (piece.position === oldPosition) {
+            // King
+            const column = COLS.indexOf(oldPosition[0]);
+            const offset = newPosition[0] === "a" ? -2 : 2;
+
+            pieceClone.setPosition(COLS[column + offset] + oldPosition[1]);
+          } else if (piece.position === newPosition) {
+            // Rook
+            const column = COLS.indexOf(newPosition[0]);
+            const offset = newPosition[0] === "a" ? 3 : -2;
+
+            pieceClone.setPosition(COLS[column + offset] + oldPosition[1]);
+          }
+
+          return pieceClone;          
+        })
+      })
+    }
+
     // Update state
     setPieces(current => {
       // Filter the captured piece if there is one

@@ -56,7 +56,9 @@ function App() {
 
   const selectPiece = (piece) => {
     setSelected(piece);
-    setLegalMoves(piece.getLegalMoves(pieces));
+
+    // TODO: filter out moves that don't solve checks
+    setLegalMoves(piece.getLegalMoves(pieces, moveNumber));
   }
 
   const onSquareClicked = (position) => {

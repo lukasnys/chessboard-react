@@ -134,30 +134,25 @@ function App() {
 
     const isCastle = piece.POINTS === POINTS.KING && destPiece?.POINTS === POINTS.ROOK && piece.isWhite === destPiece?.isWhite;
     if (isCastle) {
+      const rookColumn = COLS.indexOf(newPosition[0]);
+
       // TODO: check checks on spaces between the castle
-      setPieces(current => {
-        return current.map(piece => {
-          
+      setPieces(current => current.map(piece => {
           const pieceClone = Piece.clone(piece);
-          
-          // TODO: refactor
+
           if (piece.position === oldPosition) {
-            // King
-            const column = COLS.indexOf(oldPosition[0]);
-            const offset = newPosition[0] === "a" ? -2 : 2;
+            const kingColumn = COLS.indexOf(oldPosition[0]);
+            const kingColumnOffset = rookColumn === 0 ? -2 : 2;
 
-            pieceClone.setPosition(COLS[column + offset] + oldPosition[1]);
+            pieceClone.setPosition(COLS[kingColumn + kingColumnOffset] + oldPosition[1]);
           } else if (piece.position === newPosition) {
-            // Rook
-            const column = COLS.indexOf(newPosition[0]);
-            const offset = newPosition[0] === "a" ? 3 : -2;
+            const rookColumnOffset = rookColumn === 0 ? 3 : -2;
 
-            pieceClone.setPosition(COLS[column + offset] + oldPosition[1]);
+            pieceClone.setPosition(COLS[rookColumn + rookColumnOffset] + oldPosition[1]);
           }
 
-          return pieceClone;          
-        })
-      })
+          return pieceClone;
+        }))
     }
 
     // Update state

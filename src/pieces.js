@@ -160,31 +160,26 @@ export class Knight extends Piece {
     NOTATION = "N";
 
     getLegalMoves(pieces) {
-        let moves = [];
+        const moves = [];
 
         const column = COLS.indexOf(this.position[0]);
         const row = +this.position[1];
 
-        // TODO: refactor
         // Eight possible moves
-        moves.push(COLS[column + 1] + (row - 2))
-        moves.push(COLS[column + 2] + (row - 1))
-        moves.push(COLS[column + 2] + (row + 1))
-        moves.push(COLS[column + 1] + (row + 2))
-        moves.push(COLS[column - 1] + (row + 2))
-        moves.push(COLS[column - 2] + (row + 1))
-        moves.push(COLS[column - 2] + (row - 1))
-        moves.push(COLS[column - 1] + (row - 2))
+        const offsets = [[1, 2], [1, -2], [-1, 2], [-1, -2], [2, 1], [2, -1], [-2, 1], [-2, -1]];
+        offsets.forEach(([columnOffset, rowOffset]) => {
+            const destColumnNumber = column + columnOffset;
+            const destRow = row + rowOffset;
+            
+            const isInBounds = destColumnNumber >= 0 && destColumnNumber < 7 && destRow >= 1 && destRow < 8;
+            if (!isInBounds) return;
+            
+            const destPosition = COLS[destColumnNumber] + destRow;
+            const destPiece = pieces.find(piece => piece.position === destPosition);
+            if (destPiece?.isWhite === this.isWhite) return;
 
-        // Remove out of bounds positions
-        moves = moves.filter(move => move && +move.slice(1) >= 1 && +move.slice(1) <= 8)
-
-        // Remove positions where another piece of the same color resides
-        moves = moves.filter(move => {
-            const piece = pieces.find(piece => piece.position === move);
-            const isOtherColoredPiece = piece && piece.isWhite !== this.isWhite;
-            return !piece || isOtherColoredPiece;
-        })
+            moves.push(destPosition);
+        });
 
         return moves;
     }

@@ -48,18 +48,31 @@ function App() {
   const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
 
+  useEffect(() => {
+    const isWhiteAttacking = moveNumber % 2 !== 0;
+
+    const allDefendingPieces = pieces.filter(p => p.isWhite !== isWhiteAttacking);
+
+    // In case of a check, see if checkmate
+    const isDefenderInCheck = isColorInCheck(pieces, moveNumber, !isWhiteAttacking);
+    if (isDefenderInCheck) {
+      const isCheckMate = allDefendingPieces.every(p => p.getLegalMoves(pieces, moveNumber, false).every(move => {
+        // Do the move and check if that solves check
+        const piecesCopyWithMoveDone = doTestMove(p.position, move);
+        return isColorInCheck(piecesCopyWithMoveDone, moveNumber + 1, !isWhiteAttacking);
+      }))
+
+      if (isCheckMate) gameWon(isWhiteAttacking);
+    }
+  }, [pieces]);
+
   const gameWon = (isWhite) => {
     console.log(`${isWhite ? "White" : "Black"} won!`);
     deselectPiece();
     setMoveNumber(0);
     setPieces(initialiseBoard());
   }
-
-  const deselectPiece = () => {
-    setSelected(null);
-    setLegalMoves([]);
-  }
-
+  
   const selectPiece = (piece) => {
     setSelected(piece);
 
@@ -67,33 +80,38 @@ function App() {
 
     // Filter out moves that result in checks
     legalMoves = legalMoves.filter(move => {
-      const piecesCopy = pieces.map(p => Piece.clone(p));
-      return doesMoveSolveCheck(piece.position, move, piecesCopy)
+      const piecesCopyWithMoveDone = doTestMove(piece.position, move);
+      return !isColorInCheck(piecesCopyWithMoveDone, moveNumber + 1, piece.isWhite);
     })
     
-
     setLegalMoves(legalMoves);
+  }  
+
+  const deselectPiece = () => {
+    setSelected(null);
+    setLegalMoves([]);
   }
 
-  const isInCheck = (pieces, isWhite) => {
-    const allOtherColoredPieces = pieces.filter(p => p.isWhite !== isWhite);
-    const allOtherColoredLegalMoves = allOtherColoredPieces.flatMap(p => p.getLegalMoves(pieces, moveNumber));
+  const doTestMove = (oldPosition, newPosition) => {
+    let piecesCopy = pieces.map(p => Piece.clone(p));
+    
+    // Filter out destination piece if any
+    piecesCopy = piecesCopy.filter(p => p.position !== newPosition);
 
-    const king = pieces.find(p => p.POINTS === POINTS.KING && p.isWhite === isWhite);
-
-    return allOtherColoredLegalMoves.includes(king.position);
-  }
-
-  const doesMoveSolveCheck = (oldPosition, newPosition, pieces) => {
-    const destPiece = pieces.find(p => p.position === newPosition);
-    if (destPiece) {
-      pieces = pieces.filter(p => p.position !== newPosition);
-    }
-
-    const piece = pieces.find(p => p.position === oldPosition);
+    // Move piece
+    const piece = piecesCopy.find(p => p.position === oldPosition);
     piece.position = newPosition;
 
-    return !isInCheck(pieces, piece.isWhite);
+    return piecesCopy;
+  }
+
+  const isColorInCheck = (pieces, moveNumber, isWhite) => {
+    const allAttackingPieces = pieces.filter(p => p.isWhite !== isWhite);
+    const allAttackingLegalMoves = allAttackingPieces.flatMap(p => p.getLegalMoves(pieces, moveNumber, false));
+
+    const defendingKing = pieces.find(p => p.POINTS === POINTS.KING && p.isWhite === isWhite);
+
+    return allAttackingLegalMoves.includes(defendingKing.position);
   }
 
   const onSquareClicked = (position) => {
@@ -129,22 +147,6 @@ function App() {
     deselectPiece();
     setMoveNumber(moveNumber + 1);
   }
-
-  useEffect(() => {
-    const checkForCheckmateColor = moveNumber % 2 === 0;
-
-    if (isInCheck(pieces, checkForCheckmateColor)) {
-      // Check for checkmate
-      const allOtherColoredPieces = pieces.filter(p => p.isWhite === checkForCheckmateColor);
-      
-      const isCheckMate = allOtherColoredPieces.every(p => p.getLegalMoves(pieces, moveNumber).every(move => {
-        const piecesCopy = pieces.map(p => Piece.clone(p));
-        return !doesMoveSolveCheck(p.position, move, piecesCopy)
-      }))
-
-      if (isCheckMate) gameWon(checkForCheckmateColor);
-    }
-  }, [pieces]);
 
   // Returns reference to the piece
   const findPiece = (position) => {

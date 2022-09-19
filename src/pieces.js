@@ -36,10 +36,6 @@ export class Piece {
             : "";
     }
 
-    isMoveLegal(pieces, newPosition) {
-        return this.getLegalMoves(pieces).indexOf(newPosition) !== -1;
-    }
-
     setPosition(position) {
         this.hasMoved = true;
         this.position = position;
@@ -82,10 +78,6 @@ export class Pawn extends Piece {
     NOTATION = "N";
 
     doubleMoveMoveNumber = 0;
-
-    isMoveLegal(pieces, newPosition, moveNumber) {
-        return this.getLegalMoves(pieces, moveNumber).indexOf(newPosition) !== -1;
-    }
 
     getLegalMoves(pieces, moveNumber) {
         const moves = []
@@ -214,10 +206,12 @@ export class King extends Piece {
     FIRST_LETTER = "k";
     NOTATION = "K";
 
-    getLegalMoves(pieces) {
+    getLegalMoves(pieces, _moveNumber, includeCastling = true) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
 
         const moves = this.generateMovesFromSignsArray(signs, pieces, 1);
+
+        if (!includeCastling) return moves;
 
         if (this.hasMoved) return moves;
 

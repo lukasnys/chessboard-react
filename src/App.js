@@ -46,12 +46,23 @@ function App() {
 
   const [pieces, setPieces] = useState(initialiseBoard())
   const [selected, setSelected] = useState();
+  const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
+
+  const deselectPiece = () => {
+    setSelected(null);
+    setLegalMoves([]);
+  }
+
+  const selectPiece = (piece) => {
+    setSelected(piece);
+    setLegalMoves(piece.getLegalMoves(pieces));
+  }
 
   const onSquareClicked = (position) => {
     // Unselect the piece if it's clicked twice
     if (selected?.position === position) {
-      setSelected(null);
+      deselectPiece();
       return;
     }
 
@@ -69,11 +80,11 @@ function App() {
       if (piece.isWhite && moveNumber % 2 !== 0) return;
       if (!piece.isWhite && moveNumber % 2 === 0) return;
 
-      setSelected(piece);
+      selectPiece(piece);
       return;
     }
 
-    setSelected(null);
+    deselectPiece();
 
     const isMoveMade = movePiece(selected.position, position)
     if (!isMoveMade) {
@@ -198,7 +209,7 @@ function App() {
 
         {/* MOVEMENT HINTS */}
         {
-          selected != null && selected.getLegalMoves(pieces, moveNumber).map((position) =>
+          legalMoves && legalMoves.map((position) =>
             <div key={position} className={`hint ${position}`}></div>
           )
         }

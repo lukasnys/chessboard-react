@@ -33,6 +33,10 @@ export default class Piece {
         return column >= 0 &&  column <= 7 && row >= 1 && row <= 8;
     }
 
+    getPositionElements() {
+        return [COLS.indexOf(this.position[0]), +this.position[1]];
+    }
+
     getImage() {
         return `./images/${this.isWhite ? "w" : "b"}${this.FIRST_LETTER}.png`;
     }
@@ -52,26 +56,23 @@ export default class Piece {
     generateMovesFromSignsArray(signs, pieces, maxDistance = 7) {
         const moves = [];
 
-        const column = COLS.indexOf(this.position[0]);
-        const row = +this.position[1];
+        const [column, row] = this.getPositionElements();
 
         // Goes in a certain direction starting from the piece and sees if the square is valid
         signs.forEach(({ colSign, rowSign }) => {
             for (let i = 1; i < 1 + maxDistance; i++) {
-                const destColumnNumber = column + (colSign * i);
-                const destRow = row + (rowSign * i);
-
-                // Check bounds of 
-                if (!Piece.isInBounds(destColumnNumber + destRow)) break;
-
+                // Calculate the destination position
+                const [destColumnNumber, destRow] = [column + (colSign * i), row + (rowSign * i)]
                 const destPosition = COLS[destColumnNumber] + destRow;
-                const piece = pieces.find(piece => piece.position === destPosition);
 
-                if (piece && piece.isWhite === this.isWhite) break;
+                if (!Piece.isInBounds(destPosition)) break;
+
+                const piece = pieces.find(piece => piece.position === destPosition);
+                if (piece?.isWhite === this.isWhite) break;
 
                 moves.push(destPosition);
 
-                if (piece && piece.isWhite !== this.isWhite) break;
+                if (piece?.isWhite !== this.isWhite) break;
             }
         })
 

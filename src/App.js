@@ -41,7 +41,6 @@ const initialiseBoard = () => {
   return pieces;
 }
 
-// TODO: to see if there's checks, view all legal moves of opponent pieces and see if that results in king square
 function App() {
 
   const [pieces, setPieces] = useState(initialiseBoard())

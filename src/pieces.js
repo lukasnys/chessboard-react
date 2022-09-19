@@ -171,7 +171,7 @@ export class Knight extends Piece {
             const destColumnNumber = column + columnOffset;
             const destRow = row + rowOffset;
 
-            const isInBounds = destColumnNumber >= 0 && destColumnNumber < 7 && destRow >= 1 && destRow < 8;
+            const isInBounds = destColumnNumber >= 0 && destColumnNumber <= 7 && destRow >= 1 && destRow <= 8;
             if (!isInBounds) return;
 
             const destPosition = COLS[destColumnNumber] + destRow;

@@ -136,7 +136,6 @@ function App() {
     if (isCastle) {
       const rookColumn = COLS.indexOf(newPosition[0]);
 
-      // TODO: check checks on spaces between the castle
       setPieces(current => current.map(piece => {
           const pieceClone = Piece.clone(piece);
 
@@ -153,26 +152,28 @@ function App() {
 
           return pieceClone;
         }))
+
+        return true;
     }
 
     // Update state
     setPieces(current => {
       // Filter the captured piece if there is one
       let piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ?
-        current.filter(piece => piece.position !== newPosition) :
+        current.filter(p => p.position !== newPosition) :
         current;
 
       // Remove pawn in case of an en passant
       const isPiecePawn = piece.POINTS === POINTS.PAWN
       const didChangeColumn = oldPosition[0] !== newPosition[0];
       if (isPiecePawn && didChangeColumn && !destPiece)
-        piecesCopy = piecesCopy.filter(piece => piece.position !== newPosition[0] + oldPosition[1])
+        piecesCopy = piecesCopy.filter(p => p.position !== newPosition[0] + oldPosition[1])
 
 
       // Change the position of the moved piece
-      return piecesCopy.map(piece => piece.position === oldPosition ?
-        Piece.clone(piece).setPosition(newPosition, moveNumber) :
-        Piece.clone(piece));
+      return piecesCopy.map(p => p.position === oldPosition ?
+        Piece.clone(p).setPosition(newPosition, moveNumber) :
+        Piece.clone(p));
     });
 
     return true;

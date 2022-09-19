@@ -170,10 +170,10 @@ export class Knight extends Piece {
         offsets.forEach(([columnOffset, rowOffset]) => {
             const destColumnNumber = column + columnOffset;
             const destRow = row + rowOffset;
-            
+
             const isInBounds = destColumnNumber >= 0 && destColumnNumber < 7 && destRow >= 1 && destRow < 8;
             if (!isInBounds) return;
-            
+
             const destPosition = COLS[destColumnNumber] + destRow;
             const destPiece = pieces.find(piece => piece.position === destPosition);
             if (destPiece?.isWhite === this.isWhite) return;
@@ -222,16 +222,31 @@ export class King extends Piece {
         if (this.hasMoved) return moves;
 
         const castleVariables = [{ rookColumn: "a", piecesColumns: ["b", "c", "d"] }, { rookColumn: "h", piecesColumns: ["f", "g"] }];
+
         castleVariables.forEach(({ rookColumn, piecesColumns }) => {
             const castlePosition = rookColumn + this.position[1];
             const castleRook = pieces.find(piece => piece.POINTS === POINTS.ROOK && piece.isWhite === this.isWhite && piece.position === castlePosition);
-            const piecesBetween = piecesColumns.map(col => col + this.position[1]).map(position => pieces.find(piece => piece.position === position));
+            if (!castleRook || castleRook.hasMoved) return;
 
-            if (castleRook && !castleRook.hasMoved && piecesBetween.every(piece => !piece)) {
-                moves.push(castlePosition);
-            }
+            const piecesBetween = piecesColumns.map(col => col + this.position[1]).map(position => pieces.find(piece => piece.position === position));
+            if (!piecesBetween.every(piece => !piece)) return;
+
+            // Check if king passes through any checks
+            const checkForCheckColumns = [piecesColumns.pop(), piecesColumns.pop(), this.position[0]];
+            const checkForCheckPositions = checkForCheckColumns.map(col => col + this.position[1]);
+
+            const allOtherColoredPieces = pieces.filter(p => p.isWhite !== this.isWhite);
+            const allOtherColoredLegalMoves = allOtherColoredPieces.flatMap(p => p.getLegalMoves(pieces));
+
+            if (!allOtherColoredLegalMoves.every(possiblePosition => !checkForCheckPositions.includes(possiblePosition))) return;
+
+            moves.push(castlePosition);
         })
 
         return moves;
     }
+
+   
+
+
 }

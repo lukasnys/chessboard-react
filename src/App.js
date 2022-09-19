@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.scss';
 import { ROWS, COLS, POINTS } from './global'
 import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from './pieces';
@@ -76,7 +76,6 @@ function App() {
     setLegalMoves(legalMoves);
   }
 
-  // Returns
   const isInCheck = (pieces, isWhite) => {
     const allOtherColoredPieces = pieces.filter(p => p.isWhite !== isWhite);
     const allOtherColoredLegalMoves = allOtherColoredPieces.flatMap(p => p.getLegalMoves(pieces, moveNumber));
@@ -123,15 +122,30 @@ function App() {
       return;
     }
 
-    deselectPiece();
-
     const isMoveMade = moveSelectedPiece(position)
     if (!isMoveMade) {
       return;
     }
-
+    
+    deselectPiece();
     setMoveNumber(moveNumber + 1);
   }
+
+  useEffect(() => {
+    const checkForCheckmateColor = moveNumber % 2 === 0;
+
+    if (isInCheck(pieces, checkForCheckmateColor)) {
+      // Check for checkmate
+      const allOtherColoredPieces = pieces.filter(p => p.isWhite === checkForCheckmateColor);
+      
+      const isCheckMate = allOtherColoredPieces.every(p => p.getLegalMoves(pieces, moveNumber).every(move => {
+        const piecesCopy = pieces.map(p => Piece.clone(p));
+        return !doesMoveSolveCheck(p.position, move, piecesCopy)
+      }))
+
+      if (isCheckMate) gameWon(checkForCheckmateColor);
+    }
+  }, [pieces]);
 
   // Returns reference to the piece
   const findPiece = (position) => {

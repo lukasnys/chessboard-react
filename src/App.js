@@ -58,8 +58,41 @@ function App() {
     setSelected(piece);
 
     // TODO: filter out moves that don't solve checks
-    setLegalMoves(piece.getLegalMoves(pieces, moveNumber));
+    let legalMoves = piece.getLegalMoves(pieces, moveNumber);
+
+    // Filter out moves that result in checks
+    legalMoves = legalMoves.filter(move => {
+      const piecesCopy = pieces.map(p => Piece.clone(p));
+      return doesMoveSolveCheck(piece.position, move, piecesCopy)
+    })
+    
+
+    setLegalMoves(legalMoves);
   }
+
+  // Returns
+  const isInCheck = (pieces, isWhite) => {
+    const allOtherColoredPieces = pieces.filter(p => p.isWhite !== isWhite);
+    const allOtherColoredLegalMoves = allOtherColoredPieces.flatMap(p => p.getLegalMoves(pieces, moveNumber));
+
+    const king = pieces.find(p => p.POINTS === POINTS.KING && p.isWhite === isWhite);
+
+    return allOtherColoredLegalMoves.includes(king.position);
+  }
+
+  const doesMoveSolveCheck = (oldPosition, newPosition, pieces) => {
+    const destPiece = pieces.find(p => p.position === newPosition);
+    if (destPiece) {
+      pieces = pieces.filter(p => p.position !== newPosition);
+    }
+
+    const piece = pieces.find(p => p.position === oldPosition);
+    piece.position = newPosition;
+
+    return !isInCheck(pieces, piece.isWhite);
+  }
+
+  
 
   const onSquareClicked = (position) => {
     // Unselect the piece if it's clicked twice
@@ -88,7 +121,7 @@ function App() {
 
     deselectPiece();
 
-    const isMoveMade = movePiece(selected.position, position)
+    const isMoveMade = moveSelectedPiece(position)
     if (!isMoveMade) {
       return;
     }
@@ -135,17 +168,18 @@ function App() {
     return moveNotation;
   }
 
-  const movePiece = (oldPosition, newPosition) => {
+  const moveSelectedPiece = (newPosition) => {
+    const oldPosition = selected.position;
+
     // Check if same position
     if (oldPosition === newPosition) return false;
 
     // Check move legality
-    const piece = findPiece(oldPosition);
-    if (!piece.isMoveLegal(pieces, newPosition, moveNumber)) return false;
+    if(!legalMoves.includes(newPosition)) return;
 
     const destPiece = findPiece(newPosition);
 
-    const isCastle = piece.POINTS === POINTS.KING && destPiece?.POINTS === POINTS.ROOK && piece.isWhite === destPiece?.isWhite;
+    const isCastle = selected.POINTS === POINTS.KING && destPiece?.POINTS === POINTS.ROOK && selected.isWhite === destPiece?.isWhite;
     if (isCastle) {
       const rookColumn = COLS.indexOf(newPosition[0]);
 
@@ -172,12 +206,12 @@ function App() {
     // Update state
     setPieces(current => {
       // Filter the captured piece if there is one
-      let piecesCopy = destPiece && destPiece.isWhite !== piece.isWhite ?
+      let piecesCopy = destPiece && destPiece.isWhite !== selected.isWhite ?
         current.filter(p => p.position !== newPosition) :
         current;
 
       // Remove pawn in case of an en passant
-      const isPiecePawn = piece.POINTS === POINTS.PAWN
+      const isPiecePawn = selected.POINTS === POINTS.PAWN
       const didChangeColumn = oldPosition[0] !== newPosition[0];
       if (isPiecePawn && didChangeColumn && !destPiece)
         piecesCopy = piecesCopy.filter(p => p.position !== newPosition[0] + oldPosition[1])

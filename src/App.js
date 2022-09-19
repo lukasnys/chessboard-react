@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.scss';
+import Piece from './chess/Piece';
+import Bishop from './chess/Bishop';
+import King  from './chess/King';
+import Knight from './chess/Knight';
+import Pawn from './chess/Pawn';
+import Queen from './chess/Queen';
+import Rook from './chess/Rook';
 import { ROWS, COLS, POINTS } from './global'
-import { Bishop, King, Knight, Pawn, Piece, Queen, Rook } from './pieces';
 
 const initialiseBoard = () => {
   const pieces = [];
@@ -72,7 +78,7 @@ function App() {
     setMoveNumber(0);
     setPieces(initialiseBoard());
   }
-  
+
   const selectPiece = (piece) => {
     setSelected(piece);
 
@@ -83,9 +89,9 @@ function App() {
       const piecesCopyWithMoveDone = doTestMove(piece.position, move);
       return !isColorInCheck(piecesCopyWithMoveDone, moveNumber + 1, piece.isWhite);
     })
-    
+
     setLegalMoves(legalMoves);
-  }  
+  }
 
   const deselectPiece = () => {
     setSelected(null);
@@ -94,7 +100,7 @@ function App() {
 
   const doTestMove = (oldPosition, newPosition) => {
     let piecesCopy = pieces.map(p => Piece.clone(p));
-    
+
     // Filter out destination piece if any
     piecesCopy = piecesCopy.filter(p => p.position !== newPosition);
 
@@ -122,10 +128,10 @@ function App() {
     }
 
     const piece = findPiece(position);
-    
+
     const isPieceSameColor = piece?.isWhite === selected?.isWhite;
     const isCastle = selected?.POINTS === POINTS.KING && piece?.POINTS === POINTS.ROOK;
-    
+
     // Select the clicked piece if no piece was selected or if another piece of the same color is clicked
     if (!selected || (isPieceSameColor && !isCastle)) {
       // Check if a piece is clicked
@@ -143,7 +149,7 @@ function App() {
     if (!isMoveMade) {
       return;
     }
-    
+
     deselectPiece();
     setMoveNumber(moveNumber + 1);
   }
@@ -194,7 +200,7 @@ function App() {
     if (oldPosition === newPosition) return false;
 
     // Check move legality
-    if(!legalMoves.includes(newPosition)) return;
+    if (!legalMoves.includes(newPosition)) return;
 
     const destPiece = findPiece(newPosition);
 
@@ -203,23 +209,23 @@ function App() {
       const rookColumn = COLS.indexOf(newPosition[0]);
 
       setPieces(current => current.map(piece => {
-          const pieceClone = Piece.clone(piece);
+        const pieceClone = Piece.clone(piece);
 
-          if (piece.position === oldPosition) {
-            const kingColumn = COLS.indexOf(oldPosition[0]);
-            const kingColumnOffset = rookColumn === 0 ? -2 : 2;
+        if (piece.position === oldPosition) {
+          const kingColumn = COLS.indexOf(oldPosition[0]);
+          const kingColumnOffset = rookColumn === 0 ? -2 : 2;
 
-            pieceClone.setPosition(COLS[kingColumn + kingColumnOffset] + oldPosition[1]);
-          } else if (piece.position === newPosition) {
-            const rookColumnOffset = rookColumn === 0 ? 3 : -2;
+          pieceClone.setPosition(COLS[kingColumn + kingColumnOffset] + oldPosition[1]);
+        } else if (piece.position === newPosition) {
+          const rookColumnOffset = rookColumn === 0 ? 3 : -2;
 
-            pieceClone.setPosition(COLS[rookColumn + rookColumnOffset] + oldPosition[1]);
-          }
+          pieceClone.setPosition(COLS[rookColumn + rookColumnOffset] + oldPosition[1]);
+        }
 
-          return pieceClone;
-        }))
+        return pieceClone;
+      }))
 
-        return true;
+      return true;
     }
 
     // Update state

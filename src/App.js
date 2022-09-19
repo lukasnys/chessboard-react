@@ -57,7 +57,6 @@ function App() {
   const selectPiece = (piece) => {
     setSelected(piece);
 
-    // TODO: filter out moves that don't solve checks
     let legalMoves = piece.getLegalMoves(pieces, moveNumber);
 
     // Filter out moves that result in checks

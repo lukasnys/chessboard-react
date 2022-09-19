@@ -96,18 +96,6 @@ export class Pawn extends Piece {
         // Calculate direction of moves depending on color of the piece
         const sign = this.isWhite ? 1 : -1;
 
-        // Single square move
-        const singleMovePosition = this.position[0] + (row + (sign * 1));
-        if (!pieces.find(piece => piece.position === singleMovePosition)) {
-            moves.push(this.position[0] + (row + (sign * 1)))
-        }
-
-        // Double square move
-        const doubleMovePosition = this.position[0] + (row + (sign * 2));
-        if (!this.hasMoved && !pieces.find(piece => piece.position === doubleMovePosition)) {
-            moves.push(doubleMovePosition)
-        }
-
         // Captures and passants
         ([-1, 1]).forEach(columnSign => {
             const capturePosition = COLS[column + columnSign] + (row + (sign * 1))
@@ -127,6 +115,18 @@ export class Pawn extends Piece {
                 moves.push(capturePosition);
             }
         })
+
+        // Single square move
+        const singleMovePosition = this.position[0] + (row + (sign * 1));
+        if (pieces.find(piece => piece.position === singleMovePosition)) return moves;
+            
+        moves.push(this.position[0] + (row + (sign * 1)));
+
+        // Double square move
+        const doubleMovePosition = this.position[0] + (row + (sign * 2));
+        if (!this.hasMoved && !pieces.find(piece => piece.position === doubleMovePosition)) {
+            moves.push(doubleMovePosition)
+        }
 
         return moves;
     }

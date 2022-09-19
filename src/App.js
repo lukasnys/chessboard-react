@@ -49,6 +49,13 @@ function App() {
   const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
 
+  const gameWon = (isWhite) => {
+    console.log(`${isWhite ? "White" : "Black"} won!`);
+    deselectPiece();
+    setMoveNumber(0);
+    setPieces(initialiseBoard());
+  }
+
   const deselectPiece = () => {
     setSelected(null);
     setLegalMoves([]);
@@ -90,8 +97,6 @@ function App() {
 
     return !isInCheck(pieces, piece.isWhite);
   }
-
-  
 
   const onSquareClicked = (position) => {
     // Unselect the piece if it's clicked twice

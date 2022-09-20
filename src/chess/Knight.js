@@ -10,17 +10,17 @@ export default class Knight extends Piece {
 
     getLegalMoves(pieces) {
         const moves = [];
-
         const [column, row] = this.getPositionElements();
 
-        // Eight possible moves
         this.MOVE_OFFSETS.forEach(([columnOffset, rowOffset]) => {
             const [destColumnNumber, destRow] = [column + columnOffset, row + rowOffset]
             
+            // Check if the move is in bounds
             if (!Piece.isInBounds(destColumnNumber, destRow)) return;
             
             const destPosition = COLS[destColumnNumber] + destRow;
 
+            // Check if there's a same colored piece on the destination position
             const destPiece = pieces.find(piece => piece.position === destPosition);
             if (destPiece?.isWhite === this.isWhite) return;
 

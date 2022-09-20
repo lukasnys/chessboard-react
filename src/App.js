@@ -15,8 +15,8 @@ function App() {
   const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
 
-  const [positionAfterPromotion, setPositionAfterPromotion] = useState();
   const [promotingPiece, setPromotingPiece] = useState();
+  const [piecesBeforePromotion, setPiecesBeforePromotion] = useState();
 
   useEffect(() => {
     const didWhiteMove = moveNumber % 2 === 1;
@@ -52,28 +52,23 @@ function App() {
   }
 
   const onSquareClicked = (position) => {
-    if (selected?.position === position) {
-      deselectPiece();
-      return;
-    }
+    if (selected?.position === position) return deselectPiece();
 
+    // Cancel promotion
     if (promotingPiece) {
+      setPieces(piecesBeforePromotion);
       setPromotingPiece(null);
-      setPositionAfterPromotion("");
+      setPiecesBeforePromotion([]);
       return;
     }
 
     const piece = pieces.find(p => p.position === position);
-    const isPieceSameColor = piece?.isWhite === selected?.isWhite;
+    if (!selected || piece?.isWhite === selected?.isWhite) {
 
-    // Select the clicked piece if no piece was selected or if another piece of the same color is clicked
-    if (!selected || isPieceSameColor) {
-      // Check if a piece is clicked
       if (!piece) return;
 
       // Check if it's the correct color's turn
-      if (piece.isWhite && moveNumber % 2 !== 0) return;
-      if (!piece.isWhite && moveNumber % 2 === 0) return;
+      if (piece.isWhite && moveNumber % 2 === 1) return;
 
       selectPiece(piece);
       return;
@@ -82,39 +77,43 @@ function App() {
     setPieces(current => {
       try {
         const piecesAfterMove = Chessboard.moveWithChecks(current, selected.position, position, moveNumber);
+        
+        const movedPiece = piecesAfterMove.find(p => p.position === position);
         deselectPiece();
+        
+        // TODO: should this be checked here?
+        const lastRank = selected.isWhite ? 8 : 1;
+        const isPromoting = selected.isPawn() && movedPiece.row === lastRank;
+        if (isPromoting) {
+          setPromotingPiece(movedPiece);
+          setPiecesBeforePromotion(current);
+          return piecesAfterMove;
+        }
+
         setMoveNumber(moveNumber + 1);
         return piecesAfterMove;
       } catch (e) {
         return current;
       }
     });
-
-    // const isPromoting = selected.POINTS === POINTS.PAWN && +newPosition[1] === (selected.isWhite ? 8 : 1);
-    // if (isPromoting) {
-    //   setPromotingPiece(selected);
-    //   setPositionAfterPromotion(newPosition);
-    //   deselectPiece();
-    //   return false;
-    // }
   }
 
   const promotePiece = (selectedType) => {
     const classReferenceObject = {"q": Queen, "n": Knight, "r": Rook, "b": Bishop};
     const classReference = classReferenceObject[selectedType];
 
-    const piece = new classReference(positionAfterPromotion, promotingPiece.isWhite);
+    const piece = new classReference(promotingPiece.position, promotingPiece.isWhite);
     piece.hasMoved = true;
     
     setPieces(current => {
-      current = current.filter(p => p.position !== positionAfterPromotion && p.position !== promotingPiece.position);
+      current = current.filter(p => p.position !== promotingPiece.position);
       current.push(piece);
       return current;
     })
 
     setMoveNumber(moveNumber + 1);
-    setPositionAfterPromotion("");
     setPromotingPiece(null);
+    setPiecesBeforePromotion([]);
   }
 
   return (
@@ -144,7 +143,7 @@ function App() {
         {/* PROMOTION WINDOW */}
         {
           promotingPiece && 
-          <div className="promotion-window" style={{ flexDirection: promotingPiece.isWhite ? 'column-reverse' : 'column' ,transform: `translate(${COLS.indexOf(positionAfterPromotion[0]) * 100}%, ${promotingPiece.isWhite ? 100 : 0}%)`}}>
+          <div className="promotion-window" style={{ flexDirection: promotingPiece.isWhite ? 'column-reverse' : 'column' ,transform: `translate(${COLS.indexOf(promotingPiece.position[0]) * 100}%, ${promotingPiece.isWhite ? 100 : 0}%)`}}>
             {['q', 'n', 'r', 'b'].map(p => 
               <div key={p} onClick={() => promotePiece(p)} className={`${promotingPiece.isWhite ? "w" : "b"}${p}`}></div>
           )}

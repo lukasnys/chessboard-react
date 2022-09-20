@@ -66,13 +66,6 @@ export default class Chessboard {
             return pieces;
         }
 
-        // TODO: should this be checked here?
-        // const lastRank = piece.isWhite ? 8 : 1;
-        // const isPromoting = piece.isPawn() && +newPosition[1] === lastRank;
-        // if (isPromoting) {
-        //     return pieces;
-        // }
-
         // Remove captured piece
         const destPiece = pieces.find(p => p.position === newPosition);
         if (destPiece) pieces = pieces.filter(p => p.position !== newPosition);

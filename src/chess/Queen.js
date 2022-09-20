@@ -8,7 +8,6 @@ export default class Queen extends Piece {
 
     getLegalMoves(pieces) {
         const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
-
         return this.generateMovesFromSignsArray(signs, pieces);
     }
 }

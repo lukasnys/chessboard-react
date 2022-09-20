@@ -8,7 +8,6 @@ export default class Bishop extends Piece {
 
     getLegalMoves(pieces) {
         const signs = this.DIAGONAL_SIGNS;
-
         return this.generateMovesFromSignsArray(signs, pieces);
     }
 }

@@ -8,7 +8,6 @@ export default class Rook extends Piece {
 
     getLegalMoves(pieces) {
         const signs = this.STRAIGHT_SIGNS;
-
         return this.generateMovesFromSignsArray(signs, pieces);
     }
 }

@@ -54,6 +54,9 @@ function App() {
   const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
 
+  const [positionAfterPromotion, setPositionAfterPromotion] = useState();
+  const [promotingPiece, setPromotingPiece] = useState();
+
   useEffect(() => {
     const isWhiteAttacking = moveNumber % 2 !== 0;
 
@@ -127,6 +130,12 @@ function App() {
       return;
     }
 
+    if (promotingPiece) {
+      setPromotingPiece(null);
+      setPositionAfterPromotion("");
+      return;
+    }
+
     const piece = findPiece(position);
 
     const isPieceSameColor = piece?.isWhite === selected?.isWhite;
@@ -193,6 +202,24 @@ function App() {
     return moveNotation;
   }
 
+  const promotePiece = (selectedType) => {
+    const classReferenceObject = {"q": Queen, "n": Knight, "r": Rook, "b": Bishop};
+    const classReference = classReferenceObject[selectedType];
+
+    const piece = new classReference(positionAfterPromotion, promotingPiece.isWhite);
+    piece.hasMoved = true;
+    
+    setPieces(current => {
+      current = current.filter(p => p.position !== positionAfterPromotion && p.position !== promotingPiece.position);
+      current.push(piece);
+      return current;
+    })
+
+    setMoveNumber(moveNumber + 1);
+    setPositionAfterPromotion("");
+    setPromotingPiece(null);
+  }
+
   const moveSelectedPiece = (newPosition) => {
     const oldPosition = selected.position;
 
@@ -226,6 +253,14 @@ function App() {
       }))
 
       return true;
+    }
+
+    const isPromoting = selected.POINTS === POINTS.PAWN && +newPosition[1] === (selected.isWhite ? 8 : 1);
+    if (isPromoting) {
+      setPromotingPiece(selected);
+      setPositionAfterPromotion(newPosition);
+      deselectPiece();
+      return false;
     }
 
     // Update state
@@ -273,6 +308,16 @@ function App() {
           legalMoves && legalMoves.map((position) =>
             <div key={position} className={`hint ${position}`}></div>
           )
+        }
+
+        {/* PROMOTION WINDOW */}
+        {
+          promotingPiece && 
+          <div className="promotion-window" style={{ flexDirection: promotingPiece.isWhite ? 'column-reverse' : 'column' ,transform: `translate(${COLS.indexOf(positionAfterPromotion[0]) * 100}%, ${promotingPiece.isWhite ? 100 : 0}%)`}}>
+            {['q', 'n', 'r', 'b'].map(p => 
+              <div key={p} onClick={() => promotePiece(p)} className={`${promotingPiece.isWhite ? "w" : "b"}${p}`}></div>
+          )}
+          </div>
         }
       </div>
     </div>

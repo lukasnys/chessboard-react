@@ -36,6 +36,25 @@
     top: 0;
 }
 
+.promotion-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    width: 12.5%;
+    background-color: white;
+
+    border-radius: .25rem;
+    box-shadow: rgba(0, 0, 0, 0.5) 3px 3px 10px;
+
+    div {
+        width: 100%;
+        aspect-ratio: 1;
+        background-size: contain;
+    }
+}
+
 // Create classes for tile offsets
 $cols: 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h';
 @for $row from 1 through 8 {

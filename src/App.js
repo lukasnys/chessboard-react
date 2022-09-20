@@ -2,54 +2,15 @@ import { useEffect, useState } from 'react';
 import './App.scss';
 import Piece from './chess/Piece';
 import Bishop from './chess/Bishop';
-import King  from './chess/King';
 import Knight from './chess/Knight';
-import Pawn from './chess/Pawn';
 import Queen from './chess/Queen';
 import Rook from './chess/Rook';
 import { ROWS, COLS, POINTS } from './global'
-
-const initialiseBoard = () => {
-  const pieces = [];
-
-  // Rooks
-  pieces.push(new Rook("a1", true));
-  pieces.push(new Rook("h1", true));
-  pieces.push(new Rook("a8", false));
-  pieces.push(new Rook("h8", false));
-
-  // Knights
-  pieces.push(new Knight("b1", true));
-  pieces.push(new Knight("g1", true));
-  pieces.push(new Knight("b8", false));
-  pieces.push(new Knight("g8", false));
-
-  // Bishops
-  pieces.push(new Bishop("c1", true));
-  pieces.push(new Bishop("f1", true));
-  pieces.push(new Bishop("c8", false));
-  pieces.push(new Bishop("f8", false));
-
-  // Queen
-  pieces.push(new Queen("d1", true));
-  pieces.push(new Queen("d8", false));
-
-  // King
-  pieces.push(new King("e1", true));
-  pieces.push(new King("e8", false));
-
-  // Pawns
-  for (let i = 0; i < 8; i++) {
-    pieces.push(new Pawn(COLS[i] + 2, true));
-    pieces.push(new Pawn(COLS[i] + 7, false));
-  }
-
-  return pieces;
-}
+import Chessboard from './chess/Chessboard';
 
 function App() {
 
-  const [pieces, setPieces] = useState(initialiseBoard())
+  const [pieces, setPieces] = useState(Chessboard.getInitialBoard())
   const [selected, setSelected] = useState();
   const [legalMoves, setLegalMoves] = useState([]);
   const [moveNumber, setMoveNumber] = useState(0);
@@ -79,7 +40,7 @@ function App() {
     console.log(`${isWhite ? "White" : "Black"} won!`);
     deselectPiece();
     setMoveNumber(0);
-    setPieces(initialiseBoard());
+    setPieces(Chessboard.getInitialBoard());
   }
 
   const selectPiece = (piece) => {

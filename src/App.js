@@ -51,40 +51,34 @@ function App() {
     setLegalMoves([]);
   }
 
-  const onSquareClicked = (position) => {
-    if (selected?.position === position) return deselectPiece();
+  const cancelPromotion = () => {
+    setPieces(piecesBeforePromotion);
+    setPromotingPiece(null);
+    setPiecesBeforePromotion([]);
+  }
 
-    // Cancel promotion
-    if (promotingPiece) {
-      setPieces(piecesBeforePromotion);
-      setPromotingPiece(null);
-      setPiecesBeforePromotion([]);
-      return;
-    }
+  const onSquareClicked = (position) => {
+    if (promotingPiece) return cancelPromotion();
+    if (selected?.position === position) return deselectPiece();
 
     const piece = pieces.find(p => p.position === position);
     if (!selected || piece?.isWhite === selected?.isWhite) {
-
       if (!piece) return;
-
-      // Check if it's the correct color's turn
-      if (piece.isWhite && moveNumber % 2 === 1) return;
+      if (piece.isWhite === !!(moveNumber % 2)) return;
 
       selectPiece(piece);
       return;
     }
 
     setPieces(current => {
-      try {
         const piecesAfterMove = Chessboard.moveWithChecks(current, selected.position, position, moveNumber);
+        if (!piecesAfterMove) return current;
         
-        const movedPiece = piecesAfterMove.find(p => p.position === position);
         deselectPiece();
-        
-        // TODO: should this be checked here?
-        const lastRank = selected.isWhite ? 8 : 1;
-        const isPromoting = selected.isPawn() && movedPiece.row === lastRank;
-        if (isPromoting) {
+              
+        // Check if a piece is promoting
+        const movedPiece = piecesAfterMove.find(p => p.position === position);
+        if (Chessboard.isPromotingPiece(piecesAfterMove, movedPiece)) {
           setPromotingPiece(movedPiece);
           setPiecesBeforePromotion(current);
           return piecesAfterMove;
@@ -92,9 +86,6 @@ function App() {
 
         setMoveNumber(moveNumber + 1);
         return piecesAfterMove;
-      } catch (e) {
-        return current;
-      }
     });
   }
 

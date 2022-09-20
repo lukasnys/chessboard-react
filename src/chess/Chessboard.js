@@ -82,22 +82,22 @@ export default class Chessboard {
     }
 
     static moveWithChecks(pieces, oldPosition, newPosition, moveNumber) {
-        if (oldPosition === newPosition) throw "Invalid parameters";
+        if (oldPosition === newPosition) return;
 
         const piece = pieces.find(p => p.position === oldPosition);
-        if (!piece) throw "Invalid piece";
+        if (!piece) return;
 
         const isWhiteTurn = moveNumber % 2 === 0;
-        if (isWhiteTurn !== piece.isWhite) throw "Other person move";
+        if (isWhiteTurn !== piece.isWhite) return;
 
         const destPiece = pieces.find(p => p.position === newPosition);
-        if (destPiece && destPiece.isWhite === piece.isWhite) throw "Invalid move";
+        if (destPiece && destPiece.isWhite === piece.isWhite) return;
 
         const legalMoves = piece.getLegalMoves(pieces, moveNumber);
-        if (!legalMoves.includes(newPosition)) throw "Invalid move";
+        if (!legalMoves.includes(newPosition)) return;
 
         const piecesAfterMove = this.moveWithoutChecks(pieces, oldPosition, newPosition, moveNumber);
-        if (this.isInCheck(piecesAfterMove, moveNumber + 1, piece.isWhite)) throw "Move causes check";
+        if (this.isInCheck(piecesAfterMove, moveNumber + 1, piece.isWhite)) return;
 
         return piecesAfterMove;
     }
@@ -134,6 +134,11 @@ export default class Chessboard {
         const allAttackingLegalMoves = allAttackingPieces.flatMap(p => p.getLegalMoves(pieces, moveNumber, false));
 
         return positions.map(p => allAttackingLegalMoves.includes(p));
+    }
+
+    static isPromotingPiece(pieces, piece) {
+        const lastRow = piece.isWhite ? 8 : 1;
+        return piece.isPawn() && piece.row === lastRow;
     }
 
     static getInitialBoard() {

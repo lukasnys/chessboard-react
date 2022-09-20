@@ -6,23 +6,20 @@ export default class King extends Piece {
     FIRST_LETTER = "k";
     NOTATION = "K";
 
-    getLegalMoves(pieces, _moveNumber, includeCastling = true) {
-        const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
-
-        const moves = this.generateMovesFromSignsArray(signs, pieces, 1);
-
-        // Castling is not necessary in some situations
-        if (!includeCastling) return moves;
+    getCastlingMoves(pieces) {
+        const moves = [];
 
         if (this.hasMoved) return moves;
 
         const castleVariables = [{ rookColumn: "a", piecesColumns: ["b", "c", "d"] }, { rookColumn: "h", piecesColumns: ["f", "g"] }];
 
         castleVariables.forEach(({ rookColumn, piecesColumns }) => {
+            // Check if the rook is there and hasn't moved
             const castlePosition = rookColumn + this.position[1];
-            const castleRook = pieces.find(piece => piece.POINTS === POINTS.ROOK && piece.isWhite === this.isWhite && piece.position === castlePosition);
+            const castleRook = pieces.find(p => p.position === castlePosition && p.POINTS === POINTS.ROOK && p.isWhite === this.isWhite);
             if (!castleRook || castleRook.hasMoved) return;
 
+            // Check that all spaces between the rook and king are empty
             const piecesBetween = piecesColumns.map(col => col + this.position[1]).map(position => pieces.find(piece => piece.position === position));
             if (!piecesBetween.every(piece => !piece)) return;
 
@@ -37,6 +34,17 @@ export default class King extends Piece {
 
             moves.push(castlePosition);
         })
+
+        return moves;
+    }
+
+    getLegalMoves(pieces, _moveNumber, includeCastling = true) {
+        const signs = [...this.STRAIGHT_SIGNS, ...this.DIAGONAL_SIGNS]
+
+        const moves = this.generateMovesFromSignsArray(signs, pieces, 1);
+
+        // Castling is not necessary in some situations
+        if (includeCastling) moves.push(...this.getCastlingMoves(pieces));
 
         return moves;
     }

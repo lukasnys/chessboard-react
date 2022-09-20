@@ -139,10 +139,9 @@ function App() {
     const piece = findPiece(position);
 
     const isPieceSameColor = piece?.isWhite === selected?.isWhite;
-    const isCastle = selected?.POINTS === POINTS.KING && piece?.POINTS === POINTS.ROOK;
 
     // Select the clicked piece if no piece was selected or if another piece of the same color is clicked
-    if (!selected || (isPieceSameColor && !isCastle)) {
+    if (!selected || isPieceSameColor) {
       // Check if a piece is clicked
       if (!piece) return;
 
@@ -231,22 +230,22 @@ function App() {
 
     const destPiece = findPiece(newPosition);
 
-    const isCastle = selected.POINTS === POINTS.KING && destPiece?.POINTS === POINTS.ROOK && selected.isWhite === destPiece?.isWhite;
+
+    const horizontalOffset = COLS.indexOf(newPosition[0]) - selected.columnNumber;
+    const isCastle = selected.POINTS === POINTS.KING && Math.abs(horizontalOffset) === 2;
     if (isCastle) {
-      const rookColumn = COLS.indexOf(newPosition[0]);
+      const rookColumn = Math.sign(horizontalOffset) === -1  ? "a" : "h";
+      const rook = pieces.find(p => p.position === (rookColumn + selected.row));
 
       setPieces(current => current.map(piece => {
         const pieceClone = Piece.clone(piece);
 
-        if (piece.position === oldPosition) {
-          const kingColumn = COLS.indexOf(oldPosition[0]);
-          const kingColumnOffset = rookColumn === 0 ? -2 : 2;
+        if (piece.position === selected.position) {
+          pieceClone.setPosition(newPosition);
+        } else if (piece.position === rook.position) {
+          const destRookColumn = rookColumn === "a" ? "d" : "f";
 
-          pieceClone.setPosition(COLS[kingColumn + kingColumnOffset] + oldPosition[1]);
-        } else if (piece.position === newPosition) {
-          const rookColumnOffset = rookColumn === 0 ? 3 : -2;
-
-          pieceClone.setPosition(COLS[rookColumn + rookColumnOffset] + oldPosition[1]);
+          pieceClone.setPosition(destRookColumn + selected.row);
         }
 
         return pieceClone;

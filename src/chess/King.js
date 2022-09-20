@@ -1,4 +1,5 @@
 import { POINTS, COLS } from "../global"
+import Chessboard from "./Chessboard";
 import Piece from "./Piece";
 
 export default class King extends Piece {
@@ -13,6 +14,7 @@ export default class King extends Piece {
     // R . . . . R K .
     getCastlingMoves(pieces, moveNumber) {
         if (this.hasMoved) return [];
+        if (Chessboard.isInCheck(pieces, moveNumber, this.isWhite)) return [];
 
         const moves = [];
 

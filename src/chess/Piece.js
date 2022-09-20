@@ -1,4 +1,4 @@
-import { COLS } from "../global";
+import { COLS, POINTS } from "../global";
 
 export default class Piece {
     DIAGONAL_SIGNS = [
@@ -40,6 +40,14 @@ export default class Piece {
 
     static isInBounds(columnNumber, row) {
         return columnNumber >= 0 &&  columnNumber <= 7 && row >= 1 && row <= 8;
+    }
+
+    isPawn() {
+        return this.POINTS === POINTS.PAWN;
+    }
+
+    isKing() {
+        return this.POINTS === POINTS.KING;
     }
 
     getPositionElements() {

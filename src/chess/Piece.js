@@ -17,6 +17,18 @@ export default class Piece {
 
     hasMoved = false;
 
+    get row() {
+        return +this.position[1];
+    }
+
+    get column() {
+        return this.position[0];
+    }
+
+    get columnNumber() {
+        return COLS.indexOf(this.column);
+    }
+
     constructor(position, isWhite) {
         this.position = position;
         this.isWhite = isWhite;

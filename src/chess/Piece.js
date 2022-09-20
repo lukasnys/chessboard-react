@@ -26,11 +26,8 @@ export default class Piece {
         return Object.assign(Object.create(Object.getPrototypeOf(instance)), instance);
     }
 
-    static isInBounds(position) {
-        const column = COLS.indexOf(position[0]);
-        const row = +position[1];
-
-        return column >= 0 &&  column <= 7 && row >= 1 && row <= 8;
+    static isInBounds(columnNumber, row) {
+        return columnNumber >= 0 &&  columnNumber <= 7 && row >= 1 && row <= 8;
     }
 
     getPositionElements() {
@@ -63,16 +60,17 @@ export default class Piece {
             for (let i = 1; i < 1 + maxDistance; i++) {
                 // Calculate the destination position
                 const [destColumnNumber, destRow] = [column + (colSign * i), row + (rowSign * i)]
+                
+                if (!Piece.isInBounds(destColumnNumber, destRow)) break;
+                
                 const destPosition = COLS[destColumnNumber] + destRow;
 
-                if (!Piece.isInBounds(destPosition)) break;
-
                 const piece = pieces.find(piece => piece.position === destPosition);
-                if (piece?.isWhite === this.isWhite) break;
+                if (piece && piece.isWhite === this.isWhite) break;
 
                 moves.push(destPosition);
 
-                if (piece?.isWhite !== this.isWhite) break;
+                if (piece && piece.isWhite !== this.isWhite) break;
             }
         })
 

@@ -16,9 +16,10 @@ export default class Knight extends Piece {
         // Eight possible moves
         this.MOVE_OFFSETS.forEach(([columnOffset, rowOffset]) => {
             const [destColumnNumber, destRow] = [column + columnOffset, row + rowOffset]
+            
+            if (!Piece.isInBounds(destColumnNumber, destRow)) return;
+            
             const destPosition = COLS[destColumnNumber] + destRow;
-
-            if (!Piece.isInBounds(destPosition)) return;
 
             const destPiece = pieces.find(piece => piece.position === destPosition);
             if (destPiece?.isWhite === this.isWhite) return;

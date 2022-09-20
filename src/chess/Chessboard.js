@@ -78,7 +78,7 @@ export default class Chessboard {
         if (destPiece) pieces = pieces.filter(p => p.position !== newPosition);
 
         // Remove captured piece in case of en passant
-        if (piece.isPawn() && destPiece && piece.column !== newPosition[0]) {
+        if (piece.isPawn() && !destPiece && piece.column !== newPosition[0]) {
             pieces = pieces.filter(p => p.position !== newPosition[0] + piece.row);
         }
 

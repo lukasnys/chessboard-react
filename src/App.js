@@ -80,6 +80,7 @@ function App() {
 
         setMoveNumber(moveNumber + 1);
 
+        // TODO: fix promotion so pawn isn't left
         if (promotionType) {
           const piece = piecesAfterMove.find(p => p.position === newPosition);
           return Chessboard.promotePiece(pieces, piece, promotionType);

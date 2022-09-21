@@ -123,7 +123,7 @@ function App() {
   }
 
   const promotePiece = (selectedType) => {
-    setPieces(current => Chessboard.promotePiece(current, promotingPiece, selectedType));
+    setPieces(current => Chessboard.promotePiece(current, promotingPiece, selectedType.toUpperCase()));
 
     setMoveNumber(moveNumber + 1);
     setPromotingPiece(null);
@@ -135,6 +135,7 @@ function App() {
   // moves.push("a3", "Nc6", "Nd3", "Bb6", "Bg5", "Rfd8", "Bxf6", "gxf6", "Rac1", "Nd4", "Nxd4", "Bxd4", "Qa2", "Bxg2", "Kxg2", "Qb7+", "Kg1", "Qe4", "Qc2", "a5", "Rfd1", "Kg7", "Rd2", "Rac8");
   // moves.push("Qxc8", "Rxc8", "Rxc8", "Qd5", "b4", "a4", "e3", "Be5", "h4", "h5", "Kh2", "Bb2", "Rc5", "Qd6", "Rd1", "Bxa3", "Rxb5", "Qd7", "Rc5", "e5", "Rc2", "Qd5", "Rdd2", "Qb3", "Ra2", "e4");
   // moves.push("Nc5", "Qxb4", "Nxe4", "Qb3", "Rac2", "Bf8", "Nc5", "Qb5", "Nd3", "a3", "Nf4", "Qa5", "Ra2", "Bb4", "Rd3", "Kh6", "Rd1", "Qa4", "Rda1", "Bd6", "Kg1", "Qb3");
+  // const moves = ["f4", "g5", "fxg5", "f5", "gxf6", "Bg7", "fxg7", "h5", "gxh8=N"];
   // showGameAutomatically(moves);
 
   return (

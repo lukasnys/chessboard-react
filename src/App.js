@@ -57,6 +57,39 @@ function App() {
     setPiecesBeforePromotion([]);
   }
 
+  const showGameAutomatically = (moves) => {
+    const timeoutId = setTimeout(() => {
+      if (!moves[moveNumber] || moves[moveNumber] === "1-0" || moves[moveNumber === "0-1"]) { 
+        console.log(moveNumber);
+        clearTimeout(timeoutId);
+        return;
+      }
+
+      const result = Chessboard.moveNotationToPositions(pieces, moves[moveNumber], moveNumber);
+      if (!result) {
+        console.log(moveNumber, moves[moveNumber])
+        clearTimeout(timeoutId);
+        return;
+      }
+
+      const [oldPosition, newPosition, promotionType] = result
+      
+      setPieces(current => {
+        const piecesAfterMove = Chessboard.moveWithChecks(current, oldPosition, newPosition, moveNumber);
+        if (!piecesAfterMove) return current;
+
+        setMoveNumber(moveNumber + 1);
+
+        if (promotionType) {
+          const piece = piecesAfterMove.find(p => p.position === newPosition);
+          return Chessboard.promotePiece(pieces, piece, promotionType);
+        }
+        
+        return piecesAfterMove;
+      })
+    }, 1000);
+  }
+
   const onSquareClicked = (position) => {
     if (promotingPiece) return cancelPromotion();
     if (selected?.position === position) return deselectPiece();
@@ -96,6 +129,13 @@ function App() {
     setPromotingPiece(null);
     setPiecesBeforePromotion([]);
   }
+
+  // Uncomment to automatically play a match
+  // const moves = ["d4", "Nf6", "Nf3", "d5", "g3", "e6", "Bg2", "Be7", "O-O", "O-O", "b3", "c5", "dxc5", "Bxc5", "c4", "dxc4", "Qc2", "Qe7", "Nbd2", "Nc6", "Nxc4", "b5", "Nce5", "Nb4", "Qb2", "Bb7"];
+  // moves.push("a3", "Nc6", "Nd3", "Bb6", "Bg5", "Rfd8", "Bxf6", "gxf6", "Rac1", "Nd4", "Nxd4", "Bxd4", "Qa2", "Bxg2", "Kxg2", "Qb7+", "Kg1", "Qe4", "Qc2", "a5", "Rfd1", "Kg7", "Rd2", "Rac8");
+  // moves.push("Qxc8", "Rxc8", "Rxc8", "Qd5", "b4", "a4", "e3", "Be5", "h4", "h5", "Kh2", "Bb2", "Rc5", "Qd6", "Rd1", "Bxa3", "Rxb5", "Qd7", "Rc5", "e5", "Rc2", "Qd5", "Rdd2", "Qb3", "Ra2", "e4");
+  // moves.push("Nc5", "Qxb4", "Nxe4", "Qb3", "Rac2", "Bf8", "Nc5", "Qb5", "Nd3", "a3", "Nf4", "Qa5", "Ra2", "Bb4", "Rd3", "Kh6", "Rd1", "Qa4", "Rda1", "Bd6", "Kg1", "Qb3");
+  // showGameAutomatically(moves);
 
   return (
     <div className="App">

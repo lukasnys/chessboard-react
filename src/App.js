@@ -78,7 +78,7 @@ function App() {
               
         // Check if a piece is promoting
         const movedPiece = piecesAfterMove.find(p => p.position === position);
-        if (Chessboard.isPromotingPiece(piecesAfterMove, movedPiece)) {
+        if (Chessboard.isPromotingPiece(movedPiece)) {
           setPromotingPiece(movedPiece);
           setPiecesBeforePromotion(current);
           return piecesAfterMove;

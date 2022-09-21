@@ -136,7 +136,7 @@ export default class Chessboard {
         return positions.map(p => allAttackingLegalMoves.includes(p));
     }
 
-    static isPromotingPiece(pieces, piece) {
+    static isPromotingPiece(piece) {
         const lastRow = piece.isWhite ? 8 : 1;
         return piece.isPawn() && piece.row === lastRow;
     }

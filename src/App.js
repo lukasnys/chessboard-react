@@ -90,17 +90,7 @@ function App() {
   }
 
   const promotePiece = (selectedType) => {
-    const classReferenceObject = {"q": Queen, "n": Knight, "r": Rook, "b": Bishop};
-    const classReference = classReferenceObject[selectedType];
-
-    const piece = new classReference(promotingPiece.position, promotingPiece.isWhite);
-    piece.hasMoved = true;
-    
-    setPieces(current => {
-      current = current.filter(p => p.position !== promotingPiece.position);
-      current.push(piece);
-      return current;
-    })
+    setPieces(current => Chessboard.promotePiece(current, promotingPiece, selectedType));
 
     setMoveNumber(moveNumber + 1);
     setPromotingPiece(null);

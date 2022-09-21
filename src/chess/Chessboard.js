@@ -141,6 +141,18 @@ export default class Chessboard {
         return piece.isPawn() && piece.row === lastRow;
     }
 
+    static promotePiece(pieces, piece, chosenType) {
+        const classReferenceObject = {"q": Queen, "n": Knight, "r": Rook, "b": Bishop};
+        const classReference = classReferenceObject[chosenType];
+
+        const newPiece = new classReference(piece.position, piece.isWhite);
+        newPiece.hasMoved = true;
+
+        pieces = pieces.filter(p => p.position !== piece.position);
+        pieces.push(newPiece);
+        return pieces;
+    }
+
     static getInitialBoard() {
         const pieces = [];
 

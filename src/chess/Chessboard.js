@@ -39,7 +39,7 @@ export default class Chessboard {
         // Check promotion
         const isPromotion = moveNotation[moveNotation.length - 2] === "=";
         const promotionType = isPromotion ? moveNotation[moveNotation.length - 1] : "";
-        if (isPromotion) moveNotation = moveNotation.slice(0, -2)
+        if (isPromotion) moveNotation = moveNotation.slice(0, -2);
 
         let isCapture = false;
 

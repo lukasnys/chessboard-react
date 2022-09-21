@@ -4,7 +4,7 @@ import Piece from "./Piece";
 export default class Pawn extends Piece {
     POINTS = POINTS.PAWN;
     FIRST_LETTER = "p";
-    NOTATION = "N";
+    NOTATION = "P";
 
     doubleMoveMoveNumber = 0;
 

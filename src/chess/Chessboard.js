@@ -212,7 +212,7 @@ export default class Chessboard {
     }
 
     static promotePiece(pieces, piece, chosenType) {
-        const classReferenceObject = {"q": Queen, "n": Knight, "r": Rook, "b": Bishop};
+        const classReferenceObject = {"Q": Queen, "N": Knight, "R": Rook, "B": Bishop};
         const classReference = classReferenceObject[chosenType];
 
         const newPiece = new classReference(piece.position, piece.isWhite);

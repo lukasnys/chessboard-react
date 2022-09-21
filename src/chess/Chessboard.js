@@ -1,4 +1,4 @@
-import { COLS } from "../global";
+import { COLS, ROWS } from "../global";
 import Bishop from "./Bishop";
 import King from "./King";
 import Knight from "./Knight";
@@ -11,6 +11,76 @@ export default class Chessboard {
 
     constructor() {
         this.pieces = Chessboard.getInitialBoard();
+    }
+
+    static moveNotationToPositions(pieces, moveNotation, moveNumber) {
+        const isWhite = moveNumber % 2 === 0;
+        let filteredPieces = pieces.filter(p => p.isWhite === isWhite);
+
+        if (moveNotation.startsWith("O-O")) {
+            const shortCastle = moveNotation === "O-O";
+            const king = filteredPieces.find(p => p.isKing());
+
+            const destinationColumn = shortCastle ? "g" : "c";
+            const destination = destinationColumn + king.row;
+
+            if (!king.getLegalMoves(pieces, moveNumber).includes(destination)) return;
+
+            return [king.position, destination];
+        }
+
+        // See if there's a check or a checkmate
+        const lastChar = moveNotation[moveNotation.length - 1]
+        const isCheck = lastChar === "+";
+        const isCheckMate = lastChar === "#";
+
+        if (isCheck || isCheckMate) moveNotation = moveNotation.slice(0, -1);
+
+        // Check promotion
+        const isPromotion = moveNotation[moveNotation.length - 2] === "=";
+        const promotionType = isPromotion ? moveNotation[moveNotation.length - 1] : "";
+        if (isPromotion) moveNotation = moveNotation.slice(-2);
+
+        let isCapture = false;
+
+        // Check if it's a pawn
+        let pieceType = moveNotation[0];
+        if (pieceType >= "a" && pieceType <= "h") {
+            pieceType = "P";
+
+            isCapture = moveNotation[1] === "x";
+            if (isCapture) {
+                filteredPieces = filteredPieces.filter(p => p.column === moveNotation[0]);
+                moveNotation = moveNotation.slice(2);
+            }
+        } else {
+            moveNotation = moveNotation.slice(1);
+
+            // e.g. Nbxc3, Nbc3, Rdb1
+            // Check if additional ambiguity
+            if ((COLS.includes(moveNotation[0]) && !ROWS.includes(+moveNotation[1])) || ROWS.includes(moveNotation[0])) {
+                if (COLS.includes(moveNotation[0])) {
+                    filteredPieces = filteredPieces.filter(p => p.column === moveNotation[0]);
+                } else {
+                    filteredPieces = filteredPieces.filter(p => p.row === +moveNotation[0]);
+                }
+                moveNotation = moveNotation.slice(1);
+            }
+
+            isCapture = moveNotation[0] === "x";
+            moveNotation = moveNotation.slice(isCapture ? 1 : 0);
+        }
+
+        const destination = moveNotation;
+
+        if (isCapture && !pieces.find(p => p.position === destination)) return;
+
+        filteredPieces = filteredPieces.filter(p => p.NOTATION === pieceType && p.getLegalMoves(pieces, moveNumber).includes(destination));
+        if (isCheck) filteredPieces = filteredPieces.filter(p => Chessboard.isInCheck(Chessboard.moveWithoutChecks(pieces, p.position, destination, moveNumber), moveNumber + 1, !isWhite));
+        if (isCheckMate) filteredPieces = filteredPieces.filter(p => Chessboard.isInCheckMate(Chessboard.moveWithoutChecks(pieces, p.position, destination, moveNumber), moveNumber + 1, !isWhite));
+        if (filteredPieces.length !== 1) return;
+
+        return [filteredPieces[0].position, destination, promotionType];
     }
 
     static getMoveNotation(pieces, oldPosition, newPosition) {

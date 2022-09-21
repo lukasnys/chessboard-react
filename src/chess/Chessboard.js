@@ -73,12 +73,12 @@ export default class Chessboard {
 
         const destination = moveNotation;
 
-        
+
         filteredPieces = filteredPieces.filter(p => p.NOTATION === pieceType && p.getLegalMoves(pieces, moveNumber).includes(destination));
         if (isCheck) filteredPieces = filteredPieces.filter(p => Chessboard.isInCheck(Chessboard.moveWithoutChecks(pieces, p.position, destination, moveNumber), moveNumber + 1, !isWhite));
         if (isCheckMate) filteredPieces = filteredPieces.filter(p => Chessboard.isInCheckMate(Chessboard.moveWithoutChecks(pieces, p.position, destination, moveNumber), moveNumber + 1, !isWhite));
         if (filteredPieces.length !== 1) return;
-        
+
         // TODO: can this stay here or should it solve ambiguous moves?
         const isDestinationPiece = pieces.find(p => p.position === destination);
         const isEnPassant = pieceType === "P" && pieces.find(p => p.isPawn() && p.isWhite !== isWhite && p.position === destination[0] + filteredPieces[0].row);
@@ -216,7 +216,7 @@ export default class Chessboard {
     }
 
     static promotePiece(pieces, piece, chosenType) {
-        const classReferenceObject = {"Q": Queen, "N": Knight, "R": Rook, "B": Bishop};
+        const classReferenceObject = { "Q": Queen, "N": Knight, "R": Rook, "B": Bishop };
         const classReference = classReferenceObject[chosenType];
 
         const newPiece = new classReference(piece.position, piece.isWhite);
